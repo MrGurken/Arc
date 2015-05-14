@@ -62,6 +62,26 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
             real32_t targetSecondsPerFrame = 1.0f / (real32_t)GAME_HZ;
             uint64_t lastCounter = Win32GetClock();
+
+            PlatformInput input = {};
+
+            const Vertex vertices[] =
+            {
+                MakeVertex( Vec3( 0.0f, 1.0f, 0.0f ) ),
+                MakeVertex( Vec3( 1.0f, -1.0f, 0.0f ) ),
+                MakeVertex( Vec3( -1.0f, -1.0f, 0.0f ) )
+            };
+
+            const GLuint indices[] =
+            {
+                0, 1, 2
+            };
+            
+            Mesh mesh = {};
+            MeshAddVertices( &mesh, vertices, 3, indices, 3 );
+
+            Shader shader = {};
+            ShaderLoad( &shader, "./shaders/basic.vs", 0, "./shaders/basic.fs" );
             
             bool32_t running = true;
             while( running )
@@ -75,16 +95,24 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     }
                     else
                     {
-                        TranslateMessage( &message );
-                        DispatchMessage( &message );
+                        if( !Win32ProcessInput( &input, &message ) )
+                        {
+                            TranslateMessage( &message );
+                            DispatchMessage( &message );
+                        }
                     }
                 }
 
                 // Update
+                if( input.keys[VK_ESCAPE] )
+                    running = false;
                 
                 // Render
                 glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
                 glClear( GL_COLOR_BUFFER_BIT );
+
+                glUseProgram( shader.program );
+                MeshRender( &mesh );
 
                 // Measure and adjust time
                 uint64_t workCounter = Win32GetClock();
