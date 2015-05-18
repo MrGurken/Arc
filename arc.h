@@ -9,7 +9,12 @@
 
 #include <stdio.h>
 #include <ctime>
+
+#ifdef WIN32
 #include "win32_spacecat.h"
+#else
+#include "mac_spacecat.h"
+#endif
 
 #define DEBUGMSG( msg, ... ) { char buf[128] = {}; _snprintf( buf, 128, msg, __VA_ARGS__ ); OutputDebugStringA( buf ); }
 
